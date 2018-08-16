@@ -4,7 +4,7 @@
       <vs-col class="pages" vs-type="flex" vs-justify="center" vs-w="2">
         <div class="container">
           <vs-row v-for="(page, index) in pages.items" :key="index" vs-type="flex" vs-justify="center">
-            <vs-col vs-type="flex" class="page" vs-align="center" vs-justify="center" vs-w="11">
+            <vs-col vs-type="flex" class="page" vs-align="center" vs-justify="center" vs-w="10">
               <vs-button @click="getTree(page, index)" :class="{selected: isSelected(index)}" :vs-color="isErrored(index) ? '#F65157' : (isSelected(index) ? '#7289DA' : 'rgba(255, 255, 255, 0.2)')" vs-type="filled">
                 {{page}}
               </vs-button>
@@ -48,7 +48,7 @@ export default {
       },
       tree: {
         opts: {
-          expandIconOnly: true,
+          parentSelect: true,
           store: {
             store: this.$store,
             key: 'tree',
@@ -83,16 +83,18 @@ export default {
       }
     },
     async getTree (page, index) {
-      this.$store.dispatch('setTree', null)
-      this.selectedIndex = index
-      try {
-        this.$store.dispatch('setTree', (await getTree(page)).data)
-      } catch (err) {
-        this.unSelect()
-        this.errored.push(index)
-        setTimeout(() => {
-          this.errored.splice(index, 1)
-        }, 1000)
+      if (index !== this.selectedIndex) {
+        this.$store.dispatch('setTree', null)
+        this.selectedIndex = index
+        try {
+          this.$store.dispatch('setTree', (await getTree(page)).data)
+        } catch (err) {
+          this.unSelect()
+          this.errored.push(index)
+          setTimeout(() => {
+            this.errored.splice(index, 1)
+          }, 1000)
+        }
       }
     },
     isSelected(index) {
@@ -117,7 +119,7 @@ export default {
     font-size 1.8em
     font-weight bold
     color white
-    padding .5em 1em
+    padding .3em 1em
     border-radius .3em
     margin .5em 0
     width 100%

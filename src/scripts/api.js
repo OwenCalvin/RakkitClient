@@ -8,7 +8,6 @@ const api = axios.create({
 })
 
 export const getPages = () => {
-  console.log('aaaaaaaa')
   return api.get('')
 }
 
