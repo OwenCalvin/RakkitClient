@@ -20,7 +20,7 @@
 .tree-node.selected > .tree-content .tree-anchor
   background #ffffff66
   transform scale(1.01)
-  box-shadow: 0px 10px 25px -4px rgba(0,0,0,0.5);
+  box-shadow: 0px 10px 25px -4px rgba(0,0,0,0.15);
 
 .tree-arrow.has-child::after 
   border-color white !important

@@ -18,13 +18,14 @@
             <Tree
             class="tree container"
             :options="tree.opts"
-            ref="tree"/>
+            ref="tree">
+            </Tree>
           </vs-col>
         </vs-row>
       </vs-col>
       <vs-col class="item" vs-type="flex" vs-justify="center" vs-w="7">
         <div>
-          {{selected.item}}
+          {{selected.node && selected.node.item}}
         </div>
       </vs-col>
     </vs-row>
@@ -56,7 +57,7 @@ export default {
         loading: false
       },
       selected: {
-        item: null
+        node: null
       },
       selectedIndex: -1,
       errored: []
@@ -67,7 +68,7 @@ export default {
   },
   mounted () {
     this.$refs.tree.$on('node:selected', e => {
-      this.selected.item = e.item
+      this.selected.node = e
     })
   },
   methods: {
