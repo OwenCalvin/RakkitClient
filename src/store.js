@@ -9,7 +9,14 @@ export default new Vuex.Store({
   },
   mutations: {
     setTree (state, tree) {
-      state.tree = tree ? [tree] : []
+      if (tree) {
+        tree.state = {
+          expanded: true
+        }
+        state.tree = [tree]
+      } else {
+        state.tree = []
+      }
     }
   },
   actions: {
