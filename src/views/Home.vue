@@ -18,16 +18,13 @@
             <Tree
             class="tree container"
             :options="tree.opts"
-            ref="tree">
-              <div slot-scope="{ node }">
-                <span>{{node.text}}</span>
-              </div>
-            </Tree>
+            ref="tree"/>
           </vs-col>
         </vs-row>
       </vs-col>
       <vs-col class="item" vs-type="flex" vs-justify="center" vs-w="7">
         <div>
+          {{selected.item}}
         </div>
       </vs-col>
     </vs-row>
@@ -70,8 +67,7 @@ export default {
   },
   mounted () {
     this.$refs.tree.$on('node:selected', e => {
-      this.selected.item = e
-      console.log(JSON.parse(JSON.stringify(e)))
+      this.selected.item = e.item
     })
   },
   methods: {
