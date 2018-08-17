@@ -7023,9 +7023,9 @@ vue@^2.5.17, vue@^2.5.2:
   version "2.5.17"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.5.17.tgz#0f8789ad718be68ca1872629832ed533589c6ada"
 
-vuesax@^3.2.11:
+"vuesax@https://github.com/OwenCalvin/vuesax":
   version "3.2.11"
-  resolved "https://registry.yarnpkg.com/vuesax/-/vuesax-3.2.11.tgz#dd1ecb571b2dff2d9e104eeb7db9899623538b2b"
+  resolved "https://github.com/OwenCalvin/vuesax#ed529ff0b8bbee439f63900bcc83640757bf720b"
   dependencies:
     vue "^2.5.2"
 

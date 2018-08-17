@@ -5,6 +5,24 @@
 </template>
 
 <style lang="stylus">
+.scale-enter-active, .scale-leave-active
+  transition: all .3s
+
+.scale-enter, .scale-leave-to
+  opacity 0
+  transform scale(.8)
+
+.vs-inputx
+  background rgba(0,0,0,.3)
+  color white !important
+  font-family 'Metropolis', Helvetica, Arial, sans-serif !important
+
+.input-span-placeholder
+  color white !important
+  opacity .6
+  font-size 1.3em !important
+  font-weight bold
+
 .vs-button-text
   width 100%
   text-overflow ellipsis
@@ -18,9 +36,9 @@
   background none !important
 
 .tree-node.selected > .tree-content .tree-anchor
-  background #ffffff66
+  background #ffffff55
   transform scale(1.01)
-  box-shadow: 0px 10px 25px -4px rgba(0,0,0,0.15);
+  box-shadow: 0px 10px 25px -4px rgba(0,0,0,0.15)
 
 .tree-arrow.has-child::after 
   border-color white !important
@@ -45,14 +63,14 @@
   border-radius .3em
   overflow hidden
 
-.tree-anchor
-  span
-    font-weight bold
-    color white
-    @extend .vs-button-text
+.node-text
+  font-weight bold
+  color white
+  @extend .vs-button-text
 
 #app
-  font-family 'Metropolis', Helvetica, Arial, sans-serif
+  color white
+  font-family 'Metropolis', Helvetica, Arial, sans-serif !important
   -webkit-font-smoothing antialiased
   -moz-osx-font-smoothing grayscale
 </style>

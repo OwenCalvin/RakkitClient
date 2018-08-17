@@ -14,3 +14,17 @@ export const getPages = () => {
 export const getTree = (page) => {
   return api.get(`/pure/${page}`)
 }
+
+export const getVariations = () => {
+  return api.get('/variations')
+}
+
+export const save = (page, item) => {
+  console.log(JSON.parse(JSON.stringify(item)))
+  return api.put(`/${page}/${item.id}`, item)
+}
+
+export const del = (page, item) => {
+  console.log(JSON.parse(JSON.stringify(item)))
+  return api.put(`/${page}/${item.id}`, item)
+}

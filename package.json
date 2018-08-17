@@ -11,10 +11,11 @@
   "dependencies": {
     "axios": "^0.18.0",
     "liquor-tree": "https://github.com/OwenCalvin/liquor-tree",
+    "lodash": "^4.17.10",
     "material-icons": "^0.2.3",
     "vue": "^2.5.17",
     "vue-router": "^3.0.1",
-    "vuesax": "^3.2.11",
+    "vuesax": "https://github.com/OwenCalvin/vuesax",
     "vuex": "^3.0.1"
   },
   "devDependencies": {
