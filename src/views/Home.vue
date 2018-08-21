@@ -26,6 +26,16 @@
                 <div v-if="node.item.childType === 'list'" class="node-child-type">
                   {{node.item.childType}}
                 </div>
+                <div v-if="node.item.parent" @click="del(node)">
+                  <i class="material-icons">
+                    delete
+                  </i>
+                </div>
+                <div @click="add(node)">
+                  <i class="material-icons">
+                    add
+                  </i>
+                </div>
               </span>
             </Tree>
           </vs-col>
@@ -94,7 +104,8 @@
 </template>
 
 <script>
-import {getPages, getTree, variations, getVariations, save} from '../scripts/api.js'
+import MaterialIcon from 'material-icons'
+import {getPages, getTree, variations, getVariations, save, del, add} from '../scripts/api.js'
 import Tree from 'liquor-tree'
 import _ from 'lodash'
 
@@ -153,6 +164,11 @@ export default {
       this.selectNode(e)
     })
   },
+  computed: {
+    selectedPage () {
+      return this.pages.items[this.selectedIndex]
+    }
+  },
   methods: {
     deleteItem () {
       
@@ -206,6 +222,11 @@ export default {
       this.selected.editing = this.copyObject(node.item)
       this.selected.node = node
     },
+    unselectNode() {
+      this.selected.inital = null
+      this.selected.editing = null
+      this.selected.node = null
+    },
     addField() {
       this.selected.editing.fields.push(this.copyObject(this.defaultField))
     },
@@ -213,14 +234,36 @@ export default {
       try {
         this.selected.node.item = this.copyObject(this.selected.editing)
         this.selected.node.text = this.selected.editing.name
-        save(this.pages.items[this.selectedIndex], this.selected.editing)
+        await save(this.selectedPage, this.selected.editing)
+      } catch (err) {
+        console.log(err)
+      }
+    },
+    async del (node) {
+      try {
+        await del(this.selectedPage, node.item)
+        this.unselectNode()
+        node.remove()
+      } catch (err) {
+
+      }
+    },
+    async add (node) {
+      try {
+        const newNode = (await add(this.selectedPage, {name: 'New node', parent: node.item.id})).data
+        node.append({
+          text: newNode.name,
+          item: newNode
+        })
+        console.log(newNode)
       } catch (err) {
         console.log(err)
       }
     }
   },
   components: {
-    Tree
+    Tree,
+    MaterialIcon
   }
 }
 </script>

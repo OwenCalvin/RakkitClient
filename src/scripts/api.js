@@ -20,11 +20,14 @@ export const getVariations = () => {
 }
 
 export const save = (page, item) => {
-  console.log(JSON.parse(JSON.stringify(item)))
   return api.put(`/${page}/${item.id}`, item)
 }
 
 export const del = (page, item) => {
-  console.log(JSON.parse(JSON.stringify(item)))
-  return api.put(`/${page}/${item.id}`, item)
+  return api.delete(`/${page}/${item.id}`, item)
+}
+
+export const add = (page, item) => {
+  console.log(page)
+  return api.post('', {page: page, new: item})
 }
