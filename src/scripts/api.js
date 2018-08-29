@@ -28,6 +28,9 @@ export const del = (page, item) => {
 }
 
 export const add = (page, item) => {
-  console.log(page)
   return api.post('', {page: page, new: item})
+}
+
+export const addPage = (name) => {
+  return api.post('', {page: name, new: {}})
 }

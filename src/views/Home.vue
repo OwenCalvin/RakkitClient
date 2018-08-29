@@ -1,5 +1,14 @@
 <template>
   <div class="home">
+    <vs-prompt
+    @vs-cancel="newPage.value = ''"
+    @vs-accept="addPage"
+    :vs-active.sync="newPage.active">
+      <div class="con-exemple-prompt">
+        Enter a page name
+        <vs-input placeholder="Page name" vs-placeholder="Page name" v-model="newPage.value"/>
+      </div>
+    </vs-prompt>
     <vs-row>
       <vs-col class="pages" vs-type="flex" vs-justify="center" vs-w="2">
         <div class="container">
@@ -9,6 +18,11 @@
                 {{page}}
               </vs-button>
             </vs-col>
+          </vs-row>
+          <vs-row vs-justify="center" vs-align="center">
+            <vs-button @click="newPage.active = true">
+              +
+            </vs-button>
           </vs-row>
         </div>
       </vs-col>
@@ -75,7 +89,13 @@
                 <vs-row vs-justify="flex-start" class="fields">
                   <vs-row class="field-container" v-for="(field, index) in selected.editing.fields" :key="index">
                     <vs-input class="input-field" placeholder="Field name" v-model="field.name" vs-color="dark"/>
-                    <vs-input class="input-field input-field-value" placeholder="Field value" v-model="field.variations[variation.selected]" vs-color="dark"/>
+                    <vs-select
+                    class="select-variation"
+                    label="Type"
+                    v-model="field.type">
+                      <vs-select-item :key="index" :vs-value="item.value" :vs-text="item.text" v-for="(item, index) in types"/>
+                    </vs-select>
+                    <input-type :type="field.type" class="input-field input-field-value" placeholder="Field value" v-model="field.variations[variation.selected]" vs-color="dark"></input-type>
                   </vs-row>
                   <vs-button @click="addField">
                     New field
@@ -104,8 +124,9 @@
 </template>
 
 <script>
+import InputType from '@/components/InputType'
 import MaterialIcon from 'material-icons'
-import {getPages, getTree, variations, getVariations, save, del, add} from '../scripts/api.js'
+import {getPages, getTree, variations, getVariations, save, del, add, addPage} from '../scripts/api.js'
 import Tree from 'liquor-tree'
 import _ from 'lodash'
 
@@ -113,6 +134,17 @@ export default {
   name: 'home',
   data () {
     return {
+      types: [{
+        value: 'text:short',
+        text: 'Short text'
+      }, {
+        value: 'number:int',
+        text: 'Integer'
+      }],
+      newPage: {
+        active: false,
+        value: ''
+      },
       defaultField: {
         name: 'New field',
         variations: [],
@@ -170,8 +202,16 @@ export default {
     }
   },
   methods: {
+    async addPage () {
+      try {
+        await addPage(this.newPage.value)
+        this.pages.items.push(this.newPage.value)
+      } catch (err) {
+        console.log(err)
+      }
+    },
     deleteItem () {
-      
+
     },
     async getPages () {
       try {
@@ -197,6 +237,7 @@ export default {
         try {
           this.$store.dispatch('setTree', (await getTree(page)).data)
           this.selectedIndex = index
+          this.unselectNode()
         } catch (err) {
           this.errored.push(index)
           setTimeout(() => {
@@ -250,11 +291,12 @@ export default {
     },
     async add (node) {
       try {
-        const newNode = (await add(this.selectedPage, {name: 'New node', parent: node.item.id})).data
+        const newNode = (await add(this.selectedPage, {parent: node.item.id})).data
         node.append({
           text: newNode.name,
           item: newNode
         })
+        node.expand()
         console.log(newNode)
       } catch (err) {
         console.log(err)
@@ -263,7 +305,8 @@ export default {
   },
   components: {
     Tree,
-    MaterialIcon
+    MaterialIcon,
+    InputType
   }
 }
 </script>
@@ -306,6 +349,7 @@ export default {
 .tree-container
   padding-top 1em
   background #2C2F33
+  overflow auto
 
 .item
   background #2C2F33ef

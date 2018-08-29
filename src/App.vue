@@ -40,7 +40,7 @@
   transform scale(1.01)
   box-shadow: 0px 10px 25px -4px rgba(0,0,0,0.15)
 
-.tree-arrow.has-child::after 
+.tree-arrow.has-child::after
   border-color white !important
 
 .tree-content
@@ -62,6 +62,8 @@
   color white
   border-radius .3em
   overflow hidden
+  max-width 320px
+  min-width 320px
 
 .node-text
   font-weight bold
