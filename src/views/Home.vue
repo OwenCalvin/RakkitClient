@@ -40,7 +40,7 @@
                 <div v-if="node.item.childType === 'list'" class="node-child-type">
                   {{node.item.childType}}
                 </div>
-                <div v-if="node.item.parent" @click="del(node)">
+                <div @click="del(node)">
                   <i class="material-icons">
                     delete
                   </i>
@@ -273,9 +273,13 @@ export default {
     },
     async save() {
       try {
+        const actualPage = this.selectedPage
         this.selected.node.item = this.copyObject(this.selected.editing)
         this.selected.node.text = this.selected.editing.name
-        await save(this.selectedPage, this.selected.editing)
+        if (!this.selected.node.item.parent) {
+          this.$set(this.pages.items, this.selectedIndex, this.selected.editing.name)
+        }
+        await save(actualPage, this.selected.editing)
       } catch (err) {
         console.log(err)
       }
@@ -285,6 +289,9 @@ export default {
         await del(this.selectedPage, node.item)
         this.unselectNode()
         node.remove()
+        if (!node.item.parent) {
+          this.pages.items.splice(this.selectedIndex, 1)
+        }
       } catch (err) {
 
       }
@@ -375,11 +382,7 @@ export default {
 
 
 .fields
-  padding 2em
   height 80vh
   min-height 400px
-  background rgba(0,0,0,.3)
-  border-radius 10px
-  box-shadow: 0px 10px 30px 0px rgba(0,0,0,0.1)
-  align-content start
+  align-content flex-start
 </style>
