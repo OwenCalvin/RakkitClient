@@ -20,6 +20,7 @@ export const getVariations = () => {
 }
 
 export const save = (page, item) => {
+  console.log('save')
   return api.put(`/${page}/${item.id}`, item)
 }
 

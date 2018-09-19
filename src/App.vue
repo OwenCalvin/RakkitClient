@@ -55,8 +55,10 @@
     color white
 
 .tree-anchor
+  border: 3px solid transparent
+  box-sizing border-box
   margin-left: .5em !important
-  padding .3em 1em !important
+  padding .2em 1em !important
   transition all .2s
   background #ffffff22
   color white

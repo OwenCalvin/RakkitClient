@@ -1,5 +1,12 @@
 <template>
-  <div class="home">
+  <div class="home" @mouseup.capture="stopMoving" @mousemove="move">
+    <div
+    :style="{top: moving.pos.top - 10 + 'px', left: moving.pos.left - 10 + 'px'}"
+    ref="moving"
+    class="moving-item"
+    v-if="moving.isMoving"
+    v-html="moving.element.item.name">
+    </div>
     <vs-prompt
     @vs-cancel="newPage.value = ''"
     @vs-accept="addPage"
@@ -35,7 +42,9 @@
             ref="tree">
               <span class="node-text" slot-scope="{node}">
                 <span class="node-title">
-                  {{node.text}}
+                  {{node.text}}<br>
+                  {{node.item.id}}<br>
+                  {{node.item.parent}}
                 </span>
                 <div v-if="node.item.childType === 'list'" class="node-child-type">
                   {{node.item.childType}}
@@ -95,7 +104,7 @@
                     v-model="field.type">
                       <vs-select-item :key="index" :vs-value="item.value" :vs-text="item.text" v-for="(item, index) in types"/>
                     </vs-select>
-                    <input-type :type="field.type" class="input-field input-field-value" placeholder="Field value" v-model="field.variations[variation.selected]" vs-color="dark"></input-type>
+                    <input-type :type="field.type" class="input-field input-field-value" placeholder="Field value" v-model="field.variations[variation.selected]" vs-color="dark"/>
                   </vs-row>
                   <vs-button @click="addField">
                     New field
@@ -112,7 +121,7 @@
               </vs-button>
             </vs-row>
           </vs-row>
-          <vs-row>
+          <vs-row v-else>
             <vs-col vs-align="center" vs-justify="center" vs-type="flex" vs-w="12">
               <h1>Nothing is selected</h1>
             </vs-col>
@@ -183,6 +192,18 @@ export default {
         editing: null,
         inital: null
       },
+      moving: {
+        isMoving: false,
+        initialPos: null,
+        pos: {
+          top: 0,
+          left: 0,
+        },
+        element: null,
+        hovered: null,
+        hoveredElement: null,
+        hoveringTimer: null
+      },
       selectedIndex: -1,
       errored: []
     }
@@ -195,10 +216,52 @@ export default {
     this.$refs.tree.$on('node:selected', e => {
       this.selectNode(e)
     })
+    this.$refs.tree.$on('node:hover', (node, {target}) => {
+      if (this.moving.isMoving) {
+        this.moving.hovered = node
+        target.classList.add(this.canMove ? 'highlighted' : 'cannot-move')
+        this.moving.hoveredElement = target
+        this.moving.hoveringTimer = setTimeout(() => {
+          if (this.canMove) {
+            this.moving.hovered.expand()
+          }
+        }, 500)
+      }
+    })
+    this.$refs.tree.$on('node:unhover', e => {
+      if (this.moving.hovered) {
+        clearTimeout(this.moving.hoveringTimer)
+        this.moving.hovered = null
+        this.unHighlight()
+      }
+    })
+    this.$refs.tree.$on('node:mousedown', node => {
+      if (node.item.parent) {
+        this.moving.element = node
+      }
+    })
   },
   computed: {
     selectedPage () {
       return this.pages.items[this.selectedIndex]
+    },
+    canMove () {
+      if (this.moving.hovered && this.moving.element.item.parent && this.moving.element.item.parent !== this.moving.hovered.item.id) {
+        let canMove = true
+        let element = this.moving.hovered
+        while (element.item.parent) {
+          console.log(element.id, this.moving.element.item.id)
+          if (element.item.id === this.moving.element.item.id) {
+            console.log('CORRUPT', element.item.id, this.moving.element.item.id)
+            console.log('-----------------------------------------')
+            canMove = false
+            break
+          }
+          element = element.parent
+        }
+        return canMove
+      }
+      return false
     }
   },
   methods: {
@@ -259,9 +322,50 @@ export default {
       return _.cloneDeep(node)
     },
     selectNode(node) {
+      node.item.fields.forEach(f => {
+        f.variations = {...this.defaultField.variations, ...f.variations}
+      })
       this.selected.inital = this.copyObject(node.item)
       this.selected.editing = this.copyObject(node.item)
       this.selected.node = node
+    },
+    beginMoving(event) {
+      this.selected.element = {
+        top: event.clientY,
+        left: event.clientX
+      }
+    },
+    move(event) {
+      if (this.moving.element) {
+        this.moving.pos = {
+          top: event.clientY,
+          left: event.clientX
+        }
+        this.moving.isMoving = true
+      }
+    },
+    async stopMoving() {
+      let toSave = null
+      if ((this.moving.hovered && this.moving.element) && this.canMove) {
+        this.moving.element.item.parent = this.moving.hovered.item.id
+        toSave = {...this.moving.element}
+        this.moving.hovered.append(toSave)
+        this.moving.element.remove()
+        this.moving.hovered.expand()
+      }
+      this.moving.isMoving = false
+      this.moving.hovered = null
+      this.moving.element = null
+      this.unHighlight()
+      if (toSave) {
+        await save(this.selectedPage, toSave.item)
+      }
+    },
+    unHighlight() {
+      if (this.moving.hoveredElement) {
+        this.moving.hoveredElement.classList.remove('highlighted')
+        this.moving.hoveredElement.classList.remove('cannot-move')
+      }
     },
     unselectNode() {
       this.selected.inital = null
@@ -273,13 +377,13 @@ export default {
     },
     async save() {
       try {
-        const actualPage = this.selectedPage
+        const isMain = !this.selected.node.item.parent
         this.selected.node.item = this.copyObject(this.selected.editing)
         this.selected.node.text = this.selected.editing.name
-        if (!this.selected.node.item.parent) {
+        await save(this.selectedPage, this.selected.editing)
+        if (isMain) {
           this.$set(this.pages.items, this.selectedIndex, this.selected.editing.name)
         }
-        await save(actualPage, this.selected.editing)
       } catch (err) {
         console.log(err)
       }
@@ -319,6 +423,12 @@ export default {
 </script>
 
 <style lang="stylus">
+.highlighted
+  border 3px solid #2f89fc
+
+.cannot-move
+  background: rgba(0,0,0,.2) !important
+
 .input-name
   .vs-inputx
     font-weight bold
@@ -334,6 +444,15 @@ export default {
 
 
 <style lang="stylus" scoped>
+.moving-item
+  font-weight bold
+  pointer-events none
+  border-radius .4em
+  padding .5em 1em
+  z-index 999999
+  background #2f89fc
+  position fixed
+
 .page
   .vs-button
     font-size 1.8em
