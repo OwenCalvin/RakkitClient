@@ -222,7 +222,7 @@ export default {
         target.classList.add(this.canMove ? 'highlighted' : 'cannot-move')
         this.moving.hoveredElement = target
         this.moving.hoveringTimer = setTimeout(() => {
-          if (this.canMove) {
+          if (this.moving.element.item.id !== this.moving.hovered.item.id) {
             this.moving.hovered.expand()
           }
         }, 500)
@@ -236,6 +236,7 @@ export default {
       }
     })
     this.$refs.tree.$on('node:mousedown', node => {
+      console.log('mousedown')
       if (node.item.parent) {
         this.moving.element = node
       }
@@ -246,11 +247,10 @@ export default {
       return this.pages.items[this.selectedIndex]
     },
     canMove () {
-      if (this.moving.hovered && this.moving.element.item.parent && this.moving.element.item.parent !== this.moving.hovered.item.id) {
-        let canMove = true
+      let canMove = this.moving.hovered.children.every(e => e.item.name !== this.moving.element.item.name)
+      if (canMove && this.moving.hovered && this.moving.element.item.parent && this.moving.element.item.parent !== this.moving.hovered.item.id) {
         let element = this.moving.hovered
         while (element.item.parent) {
-          console.log(element.id, this.moving.element.item.id)
           if (element.item.id === this.moving.element.item.id) {
             console.log('CORRUPT', element.item.id, this.moving.element.item.id)
             console.log('-----------------------------------------')
@@ -498,7 +498,6 @@ export default {
 .field-container
   flex-direction column
   padding-bottom 5em
-
 
 .fields
   height 80vh

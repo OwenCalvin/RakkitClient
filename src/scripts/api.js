@@ -4,7 +4,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json'
   },
-  baseURL: 'http://127.0.0.1/RakkitCMS/public/rakkit'
+  baseURL: 'http://127.0.0.1/Rakkit/public/rakkit'
 })
 
 export const getPages = () => {
